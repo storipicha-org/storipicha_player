@@ -1,4 +1,4 @@
-package com.example.storipicha_player_android
+package io.storipicha.player.storipicha_player_android
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
