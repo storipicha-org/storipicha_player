@@ -1,4 +1,4 @@
-group = "io.storipicha.player.storipicha_player_android"
+group = "io.storipicha.storipicha_player_android"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -26,7 +26,7 @@ plugins {
 }
 
 android {
-    namespace = "io.storipicha.player.storipicha_player_android"
+    namespace = "io.storipicha.storipicha_player_android"
 
     compileSdk = 36
 
