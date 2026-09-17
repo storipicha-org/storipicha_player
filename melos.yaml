@@ -1,0 +1,23 @@
+name: storipicha_player_workspace
+repository: https://github.com/storipicha-org/storipicha_player
+
+packages:
+  - packages/*
+  - example
+
+scripts:
+  analyze:
+    exec: flutter analyze .
+    description: Run static analysis across all packages in the workspace.
+
+  format:
+    exec: dart format . --set-exit-if-changed
+    description: Check code formatting across all packages.
+
+  test:
+    exec: flutter test
+    description: Run unit tests across all packages.
+
+  clean:
+    exec: flutter clean
+    description: Clean build directories across all packages.

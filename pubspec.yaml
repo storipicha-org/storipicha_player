@@ -1,0 +1,7 @@
+name: storipicha_player
+environment:
+  sdk: ">=3.5.4 <4.0.0"
+dev_dependencies:
+  melos: ^6.0.0
+  flutter_localizations:
+    sdk: flutter
