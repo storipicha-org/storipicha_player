@@ -8,16 +8,24 @@ packages:
 scripts:
   analyze:
     exec: flutter analyze .
-    description: Run static analysis across all packages in the workspace.
+    description: "Run static analysis across all packages in the workspace."
 
   format:
     exec: dart format . --set-exit-if-changed
-    description: Check code formatting across all packages.
+    description: "Check code formatting across all packages."
 
   test:
     exec: flutter test
-    description: Run unit tests across all packages.
+    description: "Run unit tests across all packages."
 
   clean:
     exec: flutter clean
-    description: Clean build directories across all packages.
+    description: "Clean build directories across all packages."
+
+  create:package:
+    run: cd packages && flutter create --template=package
+    description: "Create a standard Dart package (Usage: melos run create:package -- <package_name>)"
+
+  create:plugin:
+    run: cd packages && flutter create --template=plugin
+    description: "Create a platform plugin package (Usage: melos run create:plugin -- --platforms=android <package_name>)"
