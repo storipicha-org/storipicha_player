@@ -1,4 +1,4 @@
-group = "io.storipicha.storipicha_player_android"
+group = "io.storipicha.player.storipicha_player_android"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -26,7 +26,7 @@ plugins {
 }
 
 android {
-    namespace = "io.storipicha.storipicha_player_android"
+    namespace = "io.storipicha.player.storipicha_player_android"
 
     compileSdk = 36
 
@@ -72,6 +72,13 @@ kotlin {
 }
 
 dependencies {
+    // 🎬 Core Media3 Playback Engine & Formats
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.3.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
+    implementation("androidx.media3:media3-common:1.3.1")
+
+    // 🧪 Testing
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }

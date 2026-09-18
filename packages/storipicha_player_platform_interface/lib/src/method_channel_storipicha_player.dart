@@ -1,27 +1,25 @@
 import 'package:flutter/services.dart';
-import 'package:storipicha_player_platform_interface/storipicha_player_platform_interface.dart';
 
-/// 🤖 Android implementation of [StoripichaPlayerPlatform]
-class StoripichaPlayerAndroid extends StoripichaPlayerPlatform {
-  static const MethodChannel _channel = MethodChannel(
+import 'storipicha_player_platform_interface.dart';
+import 'types/media_item.dart';
+import 'types/player_state.dart';
+
+class MethodChannelStoripichaPlayer extends StoripichaPlayerPlatform {
+  final MethodChannel _channel = const MethodChannel(
     'io.storipicha.player/methods',
   );
 
-  /// 3️⃣ Called automatically by Flutter's generated plugin registrant on Android boot
-  static void registerWith() {
-    StoripichaPlayerPlatform.instance = StoripichaPlayerAndroid();
-  }
-
   @override
   Future<int?> create() async {
-    return await _channel.invokeMethod<int>('create');
+    final textureId = await _channel.invokeMethod<int>('create');
+    return textureId;
   }
 
   @override
   Future<void> setMediaItem(int textureId, MediaItem item) async {
     await _channel.invokeMethod('setMediaItem', {
       'textureId': textureId,
-      'mediaItem': item.toJson(),
+      'mediaItem': item.toJson(), // 👈 Using freezed's generated toJson()
     });
   }
 
@@ -46,9 +44,21 @@ class StoripichaPlayerAndroid extends StoripichaPlayerPlatform {
   @override
   Stream<PlayerStateSnapshot> playerStateStream(int textureId) {
     final eventChannel = EventChannel('io.storipicha.player/events/$textureId');
+
     return eventChannel.receiveBroadcastStream().map((dynamic event) {
       final Map<String, dynamic> map = Map<String, dynamic>.from(event as Map);
-      return PlayerStateSnapshot.fromJson(map);
+
+      // 💡 Convert integer milliseconds into Duration maps or construct manually
+      return PlayerStateSnapshot(
+        state: PlaybackState.values.byName(map['state'] as String? ?? 'idle'),
+        isPlaying: map['isPlaying'] as bool? ?? false,
+        position: Duration(milliseconds: map['position'] as int? ?? 0),
+        bufferedPosition: Duration(
+          milliseconds: map['bufferedPosition'] as int? ?? 0,
+        ),
+        duration: Duration(milliseconds: map['duration'] as int? ?? 0),
+        errorMessage: map['errorMessage'] as String?,
+      );
     });
   }
 

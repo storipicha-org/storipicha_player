@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: storipicha_player_platform_interface
+dependency_overrides:
+  storipicha_player_platform_interface:
+    path: ../storipicha_player_platform_interface
