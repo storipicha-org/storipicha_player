@@ -29,3 +29,26 @@ scripts:
   create:plugin:
     run: cd packages && flutter create --template=plugin
     description: "Create a platform plugin package (Usage: melos run create:plugin -- --platforms=android <package_name>)"
+
+  add:
+    run: melos exec --scope="$MELOS_SCOPE" -- flutter pub add
+    description: "Add dependencies to a package. Usage: MELOS_SCOPE=<package_name> melos run add -- <dep1> <dep2> ..."
+
+  add:dev:
+    run: melos exec --scope="$MELOS_SCOPE" -- flutter pub add --dev
+    description: "Add dev dependencies to a package. Usage: MELOS_SCOPE=<package_name> melos run add:dev -- <dep1> <dep2> ..."
+
+  # MELOS_SCOPE=storipicha_player_platform_interface melos run add -- freezed_annotation json_annotation plugin_platform_interface
+  # MELOS_SCOPE=storipicha_player_platform_interface melos run add:dev -- build_runner freezed json_serializable
+
+  generate:
+    run: melos exec --depends-on="build_runner" -- dart run build_runner build --delete-conflicting-outputs
+    description: "Run build_runner codegen across all packages that depend on it. Usage: melos run generate  |  MELOS_SCOPE=<package_name> melos run generate"
+
+  generate:watch:
+    run: melos exec --depends-on="build_runner" -- dart run build_runner watch --delete-conflicting-outputs
+    description: "Run build_runner codegen in watch mode across all packages that depend on it. Usage: MELOS_SCOPE=<package_name> melos run generate:watch"
+
+  generate:clean:
+    run: melos exec --depends-on="build_runner" -- dart run build_runner clean
+    description: "Clean generated build_runner output across all packages. Usage: melos run generate:clean"
