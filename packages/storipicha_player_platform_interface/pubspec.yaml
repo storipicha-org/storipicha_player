@@ -1,7 +1,7 @@
 name: storipicha_player_platform_interface
 description: "A new Flutter package project."
 version: 0.0.1
-homepage:
+homepage: /
 
 environment:
   sdk: ^3.12.2
