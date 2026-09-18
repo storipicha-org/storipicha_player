@@ -1,47 +1,133 @@
 package io.storipicha.player.android
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.Surface
+import android.view.SurfaceView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import io.flutter.plugin.common.EventChannel
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry
 
-/** 🤖 Wraps a single Media3 ExoPlayer instance bound to a Flutter SurfaceTexture. */
 class NativePlayerInstance(
     context: Context,
     private val surfaceEntry: SurfaceTextureEntry
 ) {
-    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
-    private val surface: Surface = Surface(surfaceEntry.surfaceTexture())
+    var exoPlayer: ExoPlayer? = ExoPlayer.Builder(context).build()
+    var surface: Surface? = Surface(surfaceEntry.surfaceTexture())
+    
+    private var eventSink: EventChannel.EventSink? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var positionRunnable: Runnable? = null
 
     init {
-        // 🎨 Attach the GPU surface to the ExoPlayer instance
-        exoPlayer.setVideoSurface(surface)
+        surface?.let { exoPlayer?.setVideoSurface(it) }
+
+        // 🎧 Listen to native ExoPlayer state changes
+        exoPlayer?.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                sendStateUpdate()
+                if (isPlaying) {
+                    startPositionUpdates()
+                } else {
+                    stopPositionUpdates()
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                sendStateUpdate()
+            }
+        })
     }
 
-    /** 🚀 Sets a media URL and prepares the player for playback. */
-    fun prepare(url: String) {
+    fun setEventSink(sink: EventChannel.EventSink?) {
+        this.eventSink = sink
+        sendStateUpdate()
+    }
+
+    private fun sendStateUpdate() {
+        val player = exoPlayer ?: return
+        val sink = eventSink ?: return
+
+        // 1️⃣ Map ExoPlayer states to Dart's PlaybackState enum strings
+        val stateString = when (player.playbackState) {
+            Player.STATE_IDLE -> "idle"
+            Player.STATE_BUFFERING -> "buffering"
+            Player.STATE_READY -> "ready"
+            Player.STATE_ENDED -> "ended"
+            else -> "idle"
+        }
+
+        // 2️⃣ Sanitize duration: ExoPlayer returns negative TIME_UNSET while loading
+        val rawDuration = player.duration
+        val safeDuration = if (rawDuration > 0) rawDuration else 0L
+
+        // 2️⃣ Build map matching Dart's expected keys
+        val stateMap = mapOf(
+            "state" to stateString, // 👈 Required by PlaybackState enum
+            "isPlaying" to player.isPlaying,
+            "position" to player.currentPosition.coerceAtLeast(0L),
+            "bufferedPosition" to player.bufferedPosition.coerceAtLeast(0L),
+            "duration" to safeDuration,
+            "errorMessage" to player.playerError?.message
+        )
+
+        handler.post { sink.success(stateMap) }
+    }
+
+    private fun startPositionUpdates() {
+        stopPositionUpdates()
+        positionRunnable = object : Runnable {
+            override fun run() {
+                if (exoPlayer?.isPlaying == true) {
+                    sendStateUpdate()
+                    handler.postDelayed(this, 500) // Update twice per second ⏱️
+                }
+            }
+        }
+        handler.post(positionRunnable!!)
+    }
+
+    private fun stopPositionUpdates() {
+        positionRunnable?.let { handler.removeCallbacks(it) }
+        positionRunnable = null
+    }
+
+    fun attachToSurfaceView(surfaceView: SurfaceView) {
+        exoPlayer?.setVideoSurfaceView(surfaceView)
+    }
+
+    fun setMediaItem(url: String) {
         val mediaItem = MediaItem.fromUri(url)
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
+        exoPlayer?.setMediaItem(mediaItem)
+        exoPlayer?.prepare()
     }
 
-    /** ▶️ Starts or resumes video playback. */
     fun play() {
-        exoPlayer.play()
+        exoPlayer?.play()
     }
 
-    /** ⏸️ Pauses video playback. */
     fun pause() {
-        exoPlayer.pause()
+        exoPlayer?.pause()
     }
 
-    /** 🧹 Cleans up native resources when the player widget is disposed. */
+    fun seekTo(positionMs: Long) {
+        exoPlayer?.seekTo(positionMs)
+        sendStateUpdate()
+    }
+
     fun dispose() {
-        exoPlayer.stop()
-        exoPlayer.release()
-        surface.release()
+        stopPositionUpdates()
+        exoPlayer?.stop()
+        exoPlayer?.release()
+        exoPlayer = null
+        
+        surface?.release()
+        surface = null
+        
         surfaceEntry.release()
+        eventSink = null
     }
 }

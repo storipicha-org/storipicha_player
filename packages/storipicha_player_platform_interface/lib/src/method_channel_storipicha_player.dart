@@ -44,11 +44,21 @@ class MethodChannelStoripichaPlayer extends StoripichaPlayerPlatform {
   @override
   Stream<PlayerStateSnapshot> playerStateStream(int textureId) {
     final eventChannel = EventChannel('io.storipicha.player/events/$textureId');
+
     return eventChannel.receiveBroadcastStream().map((dynamic event) {
       final Map<String, dynamic> map = Map<String, dynamic>.from(event as Map);
-      return PlayerStateSnapshot.fromJson(
-        map,
-      ); // 👈 Deserializing using freezed's fromJson
+
+      // 💡 Convert integer milliseconds into Duration maps or construct manually
+      return PlayerStateSnapshot(
+        state: PlaybackState.values.byName(map['state'] as String? ?? 'idle'),
+        isPlaying: map['isPlaying'] as bool? ?? false,
+        position: Duration(milliseconds: map['position'] as int? ?? 0),
+        bufferedPosition: Duration(
+          milliseconds: map['bufferedPosition'] as int? ?? 0,
+        ),
+        duration: Duration(milliseconds: map['duration'] as int? ?? 0),
+        errorMessage: map['errorMessage'] as String?,
+      );
     });
   }
 

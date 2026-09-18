@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'player_state.freezed.dart';
-part 'player_state.g.dart'; // 👈 Needed for JSON serialization
+part 'player_state.g.dart';
 
 /// Represents the fundamental status of the underlying native player.
 enum PlaybackState { idle, buffering, ready, ended, error }
@@ -18,7 +18,15 @@ abstract class PlayerStateSnapshot with _$PlayerStateSnapshot {
     String? errorMessage,
   }) = _PlayerStateSnapshot;
 
-  // 👈 Added fromJson factory for deserializing EventChannel maps
+  /// A default, empty snapshot — player hasn't started yet.
+  factory PlayerStateSnapshot.initial() => const PlayerStateSnapshot(
+    state: PlaybackState.idle,
+    isPlaying: false,
+    position: Duration.zero,
+    bufferedPosition: Duration.zero,
+    duration: Duration.zero,
+  );
+
   factory PlayerStateSnapshot.fromJson(Map<String, dynamic> json) =>
       _$PlayerStateSnapshotFromJson(json);
 }
