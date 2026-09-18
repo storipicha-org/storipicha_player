@@ -16,6 +16,9 @@ dependencies:
   # 2️⃣ Default Android implementation
   storipicha_player_android:
     path: ../storipicha_player_android
+  # 3️⃣ Default iOS implementation
+  storipicha_player_ios:
+    path: ../storipicha_player_ios
 
 dev_dependencies:
   flutter_test:
@@ -28,3 +31,5 @@ flutter:
     platforms:
       android:
         default_package: storipicha_player_android
+      ios:
+        default_package: storipicha_player_ios
