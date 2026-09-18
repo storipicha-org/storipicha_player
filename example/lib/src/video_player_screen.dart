@@ -27,8 +27,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     // 2️⃣ Load media stream
     await _controller.setMediaItem(
       MediaItem(
-        url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd',
-        type: MediaSourceType.dash,
+        url:
+            'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+        type: MediaSourceType.hls,
         // title: 'Big Buck Bunny Test',
         id: '${DateTime.now().millisecondsSinceEpoch}',
         //url: '',
