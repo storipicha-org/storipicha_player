@@ -1,4 +1,4 @@
-library storipicha_player_platform_interface;
+library;
 
 // Export the abstract platform contract and default channel implementation
 export 'src/method_channel_storipicha_player.dart';
