@@ -8,7 +8,7 @@ version = "1.0-SNAPSHOT"
 
 android {
     namespace = "io.storipicha.storipicha_player_android"
-    compileSdk = 36
+    compileSdk = 35 // Target stable API level (Android 15)
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

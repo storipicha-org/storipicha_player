@@ -35,6 +35,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # 🔗 Add your relative monorepo plugin reference here:
+  storipicha_player_android:
+    path: ../packages/storipicha_player_android
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
