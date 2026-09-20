@@ -1,7 +1,8 @@
 library;
 
+export 'src/storipicha_player_config.dart';
 export 'src/player_view_type.dart';
-export 'src/storipicha_player.dart';
+export 'src/widgets/storipicha_player.dart';
 export 'src/storipicha_player_controller.dart';
 
 // Re-export common models from platform interface for convenient single-import usage

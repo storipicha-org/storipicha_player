@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:storipicha_player_platform_interface/storipicha_player_platform_interface.dart';
 
@@ -51,14 +53,18 @@ class StoripichaPlayerIos extends StoripichaPlayerPlatform {
     return eventChannel.receiveBroadcastStream().map((dynamic event) {
       final Map<String, dynamic> map = Map<String, dynamic>.from(event as Map);
 
+      // 🛡️ Safely parse position and duration as num to handle both int and double values
+      final rawPos = (map['position'] as num?)?.toInt() ?? 0;
+      final rawDur = (map['duration'] as num?)?.toInt() ?? 0;
+
       return PlayerStateSnapshot(
         state: PlaybackState.values.byName(map['state'] as String? ?? 'idle'),
         isPlaying: map['isPlaying'] as bool? ?? false,
-        position: Duration(milliseconds: map['position'] as int? ?? 0),
+        position: Duration(milliseconds: max(0, rawPos)),
         bufferedPosition: Duration(
-          milliseconds: map['bufferedPosition'] as int? ?? 0,
+          milliseconds: (map['bufferedPosition'] as num?)?.toInt() ?? 0,
         ),
-        duration: Duration(milliseconds: map['duration'] as int? ?? 0),
+        duration: Duration(milliseconds: max(0, rawDur)),
         errorMessage: map['errorMessage'] as String?,
       );
     });

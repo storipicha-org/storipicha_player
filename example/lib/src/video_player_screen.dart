@@ -14,9 +14,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = StoripichaPlayerController(
-      viewType: PlayerViewType.texture, // 🎨 Or PlayerViewType.surface
-    );
+    _controller = StoripichaPlayerController();
     _initializeAndPlay();
   }
 

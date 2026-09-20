@@ -1,16 +1,31 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:storipicha_player_platform_interface/storipicha_player_platform_interface.dart';
 
 import 'player_view_type.dart';
+import 'storipicha_player_config.dart';
 
 class StoripichaPlayerController extends ValueNotifier<PlayerStateSnapshot> {
-  StoripichaPlayerController({this.viewType = PlayerViewType.texture})
-    : super(PlayerStateSnapshot.initial());
+  StoripichaPlayerController({StoripichaPlayerConfig? config})
+    : config = config ?? const StoripichaPlayerConfig(),
+      super(PlayerStateSnapshot.initial());
 
-  /// 🎛️ Selected rendering view strategy
-  PlayerViewType viewType;
+  /// ⚙️ Configuration settings for playback and controls
+  final StoripichaPlayerConfig config;
+
+  /// Convenience getter for viewType
+  PlayerViewType get viewType => config.viewType;
+
+  bool _controlsVisible = true;
+
+  bool get controlsVisible => _controlsVisible;
+
+  set controlsVisible(bool visible) {
+    if (_controlsVisible != visible) {
+      _controlsVisible = visible;
+      notifyListeners(); // 🔔 Alert custom control widgets to rebuild
+    }
+  }
 
   int? _textureId;
   StreamSubscription<PlayerStateSnapshot>? _subscription;
