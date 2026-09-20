@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Surface
 import android.view.SurfaceView
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -25,7 +26,7 @@ class NativePlayerInstance(
     init {
         surface?.let { exoPlayer?.setVideoSurface(it) }
 
-        // 🎧 Listen to native ExoPlayer state changes
+        // 🎧 Listen to native ExoPlayer state & timeline changes
         exoPlayer?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 sendStateUpdate()
@@ -37,6 +38,20 @@ class NativePlayerInstance(
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
+                sendStateUpdate()
+            }
+
+            // ⏱️ Fired when media duration/metadata becomes available
+            override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) {
+                sendStateUpdate()
+            }
+
+            // ⏩ Fired when user seeks or position jumps
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
                 sendStateUpdate()
             }
         })
@@ -60,13 +75,13 @@ class NativePlayerInstance(
             else -> "idle"
         }
 
-        // 2️⃣ Sanitize duration: ExoPlayer returns negative TIME_UNSET while loading
+        // 2️⃣ Sanitize duration: Ignore C.TIME_UNSET (-9223372036854775807)
         val rawDuration = player.duration
-        val safeDuration = if (rawDuration > 0) rawDuration else 0L
+        val safeDuration = if (rawDuration != C.TIME_UNSET && rawDuration > 0) rawDuration else 0L
 
-        // 2️⃣ Build map matching Dart's expected keys
+        // 3️⃣ Build state map with Long values matching Dart's expected keys
         val stateMap = mapOf(
-            "state" to stateString, // 👈 Required by PlaybackState enum
+            "state" to stateString,
             "isPlaying" to player.isPlaying,
             "position" to player.currentPosition.coerceAtLeast(0L),
             "bufferedPosition" to player.bufferedPosition.coerceAtLeast(0L),
@@ -83,7 +98,7 @@ class NativePlayerInstance(
             override fun run() {
                 if (exoPlayer?.isPlaying == true) {
                     sendStateUpdate()
-                    handler.postDelayed(this, 500) // Update twice per second ⏱️
+                    handler.postDelayed(this, 200) // Update 5 times per second for smooth slider movement ⏱️
                 }
             }
         }
